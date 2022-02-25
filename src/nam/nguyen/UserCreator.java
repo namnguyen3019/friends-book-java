@@ -9,7 +9,7 @@ public class UserCreator {
         data = d;
     }
 
-    public void register() {
+    public boolean register() {
         String loginId = "";
         String password = "";
         String name = "";
@@ -50,7 +50,7 @@ public class UserCreator {
         school = input.next();
         System.out.println("Your account is being created! Please wait");
 
-        data.createUser(loginId, password, name, school);
+        return data.createUser(loginId, password, name, school);
     }
 
     public User login() {

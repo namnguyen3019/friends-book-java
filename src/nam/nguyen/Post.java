@@ -8,17 +8,25 @@ public class Post {
     private String content;
     private String owner_id;
     private Timestamp created_at;
+    private Timestamp updated_at;
 
-    public Post(int post_id, String content, String owner_id, Timestamp created_at) {
+    public Post(int post_id, String content, String owner_id, Timestamp created_at, Timestamp updated_at) {
         this.post_id = post_id;
         this.content = content;
         this.owner_id = owner_id;
         this.created_at = created_at;
+        this.updated_at = updated_at;
     }
 
     public Post(String content, String username) {
         this.content = content;
         this.owner_id = username;
+    }
+
+    public Post(int post_id2, String new_content, String owner_id) {
+        this.post_id = post_id2;
+        this.content = new_content;
+        this.owner_id = owner_id;
     }
 
     public void setContent(String content) {
@@ -53,6 +61,9 @@ public class Post {
         return post_id;
     }
 
+    public Timestamp getUpdated_at() {
+        return updated_at;
+    }
 }
 
 // public void createPost(String username) {

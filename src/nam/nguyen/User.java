@@ -1,5 +1,7 @@
 package nam.nguyen;
 
+import java.util.ArrayList;
+
 public class User {
 
     // User attributes
@@ -23,6 +25,22 @@ public class User {
 
     public boolean createPost(Post post, DataStorage d) {
         return d.createPost(post);
+    }
+
+    public Post getPostById(int post_id, DataStorage d) {
+        return d.getPostById(post_id, username);
+    }
+
+    public ArrayList<Post> getPosts(DataStorage d) {
+        return d.getPosts(username);
+    }
+
+    public boolean updatePost(Post new_post, DataStorage d) {
+        return d.updatePost(new_post);
+    }
+
+    public boolean deletePost(int post_id, String username, DataStorage d) {
+        return d.deletePost(post_id, username = this.getUsername());
     }
 
     // public ArrayList<String> getFriends(String username) {
