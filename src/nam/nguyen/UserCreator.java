@@ -2,16 +2,14 @@ package nam.nguyen;
 
 import java.util.Scanner;
 
-public class AccountCreator {
-
+public class UserCreator {
     private DataStorage data;
 
-    public AccountCreator(DataStorage d) {
+    public UserCreator(DataStorage d) {
         data = d;
     }
 
     public void register() {
-        // REGISTER FUNCTION
         String loginId = "";
         String password = "";
         String name = "";
@@ -24,14 +22,13 @@ public class AccountCreator {
         String usernaemPattern = "^[a-zA-Z]\\w{2,10}$";
         while (!loginReq) {
             System.out.println("Enter loginid from 3 - 10");
-            loginId = input.next();
+            loginId = input.next().toLowerCase();
             if (loginId.matches(usernaemPattern)) {
                 loginReq = true;
             } else {
                 System.out.println("Username not  match");
             }
         }
-
         // Enter password
         String passwordPattern = "^.{3,}$";
         boolean passwordReq = false;
@@ -47,13 +44,26 @@ public class AccountCreator {
             }
         }
 
-        System.out.println("Enter name");
+        System.out.println("Enter name: ");
         name = input.next();
-        System.out.println("Enter your school");
+        System.out.println("Enter your school: ");
         school = input.next();
-
         System.out.println("Your account is being created! Please wait");
-        data.createAUser(loginId, password, name, school);
+
+        data.createUser(loginId, password, name, school);
     }
 
+    public User login() {
+        Scanner input = new Scanner(System.in);
+        String username = "";
+        String password = "";
+
+        System.out.println("Eneter your username");
+        username = input.next();
+        System.out.println("Enter your password");
+        password = input.next();
+
+        User userInfo = data.userLogin(username, password);
+        return userInfo;
+    }
 }
