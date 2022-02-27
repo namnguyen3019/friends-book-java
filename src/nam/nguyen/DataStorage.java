@@ -11,11 +11,19 @@ public interface DataStorage {
     User userLogin(String username, String password);
 
     // // User friend relationship
-    // ArrayList<String> getFriends(String username);
+    ArrayList<String> getFriendList(User user);
 
-    // boolean sendFriendReq(FriendRequest friendRequest);
+    User getFriendByUsername(User user, String friend_username);
 
-    // ArrayList<String> showFriendsSuggestionList(String username);
+    ArrayList<FriendRequest> getFriendRequestList(User user);
+
+    boolean acceptFriendReq(User user, int friend_req_id);
+
+    boolean denyFriendReq(User user, int friend_req_id);
+
+    boolean sendFriendReq(FriendRequest friendRequest);
+
+    ArrayList<String> friendSuggestionList(User user);
 
     // Posts
     boolean createPost(Post post);

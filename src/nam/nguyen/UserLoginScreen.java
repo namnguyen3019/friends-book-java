@@ -29,7 +29,7 @@ public class UserLoginScreen {
             if (choice.equals("1")) {
                 new PostScreen(user, d).showPostScreen();
             } else if (choice.equals("2")) {
-                user.getPosts(d);
+                new FriendsScreen(user, d).showMenu();
             }
 
         }

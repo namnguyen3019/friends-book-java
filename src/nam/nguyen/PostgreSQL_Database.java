@@ -11,19 +11,20 @@ import java.util.ArrayList;
 public class PostgreSQL_Database implements DataStorage {
 
     final String url = "jdbc:postgresql://localhost:5432/friendsbook";
-    final String user = "namnguyen";
+    final String db_user = "namnguyen";
     final String password = "123456";
     Connection conn = null;
     Statement statement = null;
 
     /*
-     * User function: createAuser, userLogin, userGetFriends
+     * User functions: createAuser, userLogin
+     * Post: CRUD a post
      */
     @Override
     public boolean createUser(String username, String password, String name, String school) {
         boolean isUserCreated = false;
         try {
-            conn = DriverManager.getConnection(url, user, password);
+            conn = DriverManager.getConnection(url, db_user, password);
             statement = conn.createStatement();
             conn.setAutoCommit(false);
             String queryUser = "SELECT 1 FROM users WHERE username = '" + username.toLowerCase() + "'";
@@ -66,7 +67,7 @@ public class PostgreSQL_Database implements DataStorage {
     public User userLogin(String username, String password) {
         User userInfo = null;
         try {
-            conn = DriverManager.getConnection(url, user, password);
+            conn = DriverManager.getConnection(url, db_user, password);
             statement = conn.createStatement();
             String query = "SELECT username, name, school from users WHERE users.username = '" + username
                     + "' AND users.password = '" + password + "' LIMIT 1";
@@ -94,7 +95,7 @@ public class PostgreSQL_Database implements DataStorage {
     public boolean createPost(Post post) {
         boolean postCreated = false;
         try {
-            conn = DriverManager.getConnection(url, user, password);
+            conn = DriverManager.getConnection(url, db_user, password);
             statement = conn.createStatement();
 
             String query = "INSERT INTO posts(owner_id, content) VALUES('" + post.getOwner_id() + "', '"
@@ -118,7 +119,7 @@ public class PostgreSQL_Database implements DataStorage {
     @Override
     public Post getPostById(int post_id, String username) {
         try {
-            conn = DriverManager.getConnection(url, user, password);
+            conn = DriverManager.getConnection(url, db_user, password);
             statement = conn.createStatement();
 
             String query = "Select * FROM posts WHERE post_id = '" + post_id
@@ -148,7 +149,7 @@ public class PostgreSQL_Database implements DataStorage {
         ArrayList<Post> currentPosts = new ArrayList<Post>();
 
         try {
-            conn = DriverManager.getConnection(url, user, password);
+            conn = DriverManager.getConnection(url, db_user, password);
             statement = conn.createStatement();
 
             String query = "SELECT * FROM posts WHERE owner_id = '" + username + "' LIMIT 5";
@@ -177,7 +178,7 @@ public class PostgreSQL_Database implements DataStorage {
     public boolean updatePost(Post post) {
         boolean isUpdated = false;
         try {
-            conn = DriverManager.getConnection(url, user, password);
+            conn = DriverManager.getConnection(url, db_user, password);
             statement = conn.createStatement();
 
             String query = "UPDATE posts SET content = '" + post.getContent()
@@ -203,7 +204,7 @@ public class PostgreSQL_Database implements DataStorage {
     @Override
     public boolean deletePost(int post_id, String owner_id) {
         try {
-            conn = DriverManager.getConnection(url, user, password);
+            conn = DriverManager.getConnection(url, db_user, password);
             statement = conn.createStatement();
 
             String query = "DELETE FROM posts WHERE post_id = '" + post_id + "' AND owner_id = '" + owner_id + "'";
@@ -222,114 +223,236 @@ public class PostgreSQL_Database implements DataStorage {
         }
         return false;
     }
-    // User friends: add new friends, send friend request, accept new friend, remove
-    // friends
-    // @Override
-    // public ArrayList<String> getFriends(String username) {
-    // ArrayList<String> friends = new ArrayList<String>();
 
-    // try {
-    // conn = DriverManager.getConnection(url, user, password);
-    // statement = conn.createStatement();
-    // String query = "SELECT req_sender, req_receiver from user_friends WHERE
-    // (req_sender = '" + username
-    // + "' or req_receiver = '"
-    // + username + "') and status = 'approved'";
+    /*
+     * User friends: get friend list, get a friend's infor, get friend request..
+     * Accept or deny a friend request
+     */
+    @Override
+    public ArrayList<String> getFriendList(User curUser) {
+        ArrayList<String> friendList = new ArrayList<String>();
+        String username = curUser.getUsername();
+        try {
+            conn = DriverManager.getConnection(url, db_user, password);
+            statement = conn.createStatement();
+            String query = "SELECT req_sender, req_receiver FROM user_friends WHERE (req_sender = '" + username
+                    + "' or req_receiver = '" + username + "') AND status = 'approved'";
 
-    // ResultSet rs = statement.executeQuery(query);
+            ResultSet rs = statement.executeQuery(query);
 
-    // while (rs.next()) {
-    // String user_1 = rs.getString(1);
-    // String user_2 = rs.getString(2);
-    // if (user_1.equals(username)) {
-    // friends.add(user_2);
-    // } else {
-    // friends.add(user_1);
-    // }
-    // }
+            while (rs.next()) {
+                String user_1 = rs.getString(1);
+                String user_2 = rs.getString(2);
+                if (user_1.equals(username)) {
+                    friendList.add(user_2);
+                } else {
+                    friendList.add(user_1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return friendList;
+    }
 
-    // } catch (Exception e) {
-    // // TODO: handle exception
-    // e.printStackTrace();
-    // }
-    // // for (String friend : friends) {
-    // // System.out.println(friend);
-    // // }
-    // return friends;
-    // }
+    @Override
+    public User getFriendByUsername(User curUser, String friend_username) {
 
-    // @Override
-    // public boolean sendFriendReq(FriendRequest friendRequest) {
-    // boolean isRequestSend = false;
+        try {
+            conn = DriverManager.getConnection(url, db_user, password);
+            statement = conn.createStatement();
+            ArrayList<String> friendList = getFriendList(curUser);
+            String friendListString = "";
+            for (String username : friendList) {
+                friendListString += "'" + username + "',";
+            }
+            String s = friendListString.substring(0, friendListString.length() - 1);
+            String query = "SELECT * FROM users WHERE username = '" + friend_username + "' and username in(" + s + " )";
+            ResultSet rs = statement.executeQuery(query);
+            if (rs.next()) {
+                String username = rs.getString(1);
+                String name = rs.getString(2);
+                String school = rs.getString(3);
+                User friend = new User(username, name, school);
+                return friend;
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-    // try {
-    // conn = DriverManager.getConnection(url, user, password);
-    // statement = conn.createStatement();
+    @Override
+    public ArrayList<FriendRequest> getFriendRequestList(User curUser) {
 
-    // // // Check if two are friends or already request
+        ArrayList<FriendRequest> friendRequestsList = new ArrayList<FriendRequest>();
+        try {
+            conn = DriverManager.getConnection(url, db_user, password);
+            statement = conn.createStatement();
 
-    // // String friend_req_check = "SELECT * FROM user_friends WHERE (req_sender =
-    // // '"+friendRequest.getSender()+"' and req_receiver =
-    // // '"+friendRequest.getReceiver()+"') OR (req_sender =
-    // // '"+friendRequest.getReceiver()+"' and req_receiver =
-    // // '"+friendRequest.getSender()+"')";
+            String query = "SELECT * FROM user_friends WHERE req_receiver = '" + curUser.getUsername()
+                    + "' AND status = 'pending'";
 
-    // // ResultSet rs = statement.executeQuery(friend_req_check);
-    // // if(rs.next()){
-    // // String status = rs.getString("status");
-    // // if(status.equals("approved")){
-    // // System.out.println("You are");
-    // // }
-    // // System.out.println("");
-    // // return isRequestSend;
-    // // }
+            ResultSet rs = statement.executeQuery(query);
 
-    // String query = "INSERT INTO user_friends(req_sender, req_receiver, status,
-    // note) VALUES('"
-    // + friendRequest.getSender() + "', '" + friendRequest.getReceiver() + "', '"
-    // + friendRequest.getStatus() + "', '" + friendRequest.getNote() + "') ";
+            while (rs.next()) {
+                int user_friends_id = rs.getInt(1);
+                String sender = rs.getString(2);
+                String receiver = rs.getString(3);
+                String status = rs.getString(4);
+                String note = rs.getString(5);
+                boolean isSeen = rs.getBoolean(6);
+                Timestamp created_at = rs.getTimestamp(7);
+                Timestamp updated_at = rs.getTimestamp(8);
 
-    // int result = statement.executeUpdate(query);
-    // if (result == 1) {
-    // isRequestSend = true;
-    // System.out.println("Request sent");
-    // return isRequestSend;
-    // }
-    // } catch (Exception e) {
-    // // TODO: handle exception
-    // e.printStackTrace();
-    // }
+                FriendRequest friendRequest = new FriendRequest(user_friends_id, sender, receiver, status, note, isSeen,
+                        created_at,
+                        updated_at);
 
-    // return isRequestSend;
-    // }
+                friendRequestsList.add(friendRequest);
+            }
 
-    // @Override
-    // public ArrayList<String> showFriendsSuggestionList(String username) {
-    // ArrayList<String> friendSuggesttionList = new ArrayList<String>();
-    // try {
-    // conn = DriverManager.getConnection(url, user, password);
-    // statement = conn.createStatement();
+            return friendRequestsList;
 
-    // ArrayList<String> userFriends = getFriends(username);
-    // for (String friend : userFriends) {
-    // String query = "SELECT req_receiver FROM user_friends WHERE req_sender = '" +
-    // friend
-    // + "' AND req_receiver != '" + username + "' AND status = 'approved' LIMIT 2";
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+        }
 
-    // ResultSet rs = statement.executeQuery(query);
-    // while (rs.next()) {
-    // String suggested_friend = rs.getString(1);
-    // System.out.println(suggested_friend);
-    // friendSuggesttionList.add(suggested_friend);
-    // }
-    // }
-    // } catch (Exception e) {
-    // // TODO: handle exception
-    // e.printStackTrace();
-    // }
+        return friendRequestsList;
+    }
 
-    // return friendSuggesttionList;
-    // }
+    @Override
+    public boolean acceptFriendReq(User user, int friend_req_id) {
+        try {
+            conn = DriverManager.getConnection(url, db_user, password);
+            statement = conn.createStatement();
+
+            String query = "Update user_friends set status = 'approved', isSeen = true WHERE user_friends_id = '"
+                    + friend_req_id + "'";
+
+            int result = statement.executeUpdate(query);
+
+            if (result == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean denyFriendReq(User user, int friend_req_id) {
+        try {
+            conn = DriverManager.getConnection(url, db_user, password);
+            statement = conn.createStatement();
+
+            String query = "Update user_friends set status = 'denied', isSeen = true WHERE user_friends_id = '"
+                    + friend_req_id + "'";
+
+            int result = statement.executeUpdate(query);
+
+            if (result == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public ArrayList<String> friendSuggestionList(User curUser) {
+        ArrayList<String> friendSuggestionList = new ArrayList<String>();
+        try {
+            conn = DriverManager.getConnection(url, db_user, password);
+            statement = conn.createStatement();
+            ArrayList<String> friends = getFriendList(curUser);
+
+            for (String friend : friends) {
+                // SELECT a friend from current user's friends
+                String query = "SELECT * FROM users WHERE username = '" + friend + "'";
+                ResultSet rs = statement.executeQuery(query);
+                if (rs.next()) {
+                    String username = rs.getString(1);
+                    String name = rs.getString(2);
+                    String school = rs.getString(3);
+                    User friendOfUserFriend = new User(username, name, school);
+                    ArrayList<String> friendsFromFriend = getFriendList(friendOfUserFriend);
+                    // From friends of user's friend: add to the list
+                    // exclude current User.
+                    for (int i = 0; i < friendsFromFriend.size(); i++) {
+                        if (!friendsFromFriend.get(i).equals(curUser.getUsername())) {
+                            friendSuggestionList.add(friendsFromFriend.get(i));
+                        }
+                        if (i == 3) {
+                            break;
+                        }
+                    }
+                }
+            }
+            return friendSuggestionList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return friendSuggestionList;
+        }
+
+    }
+
+    @Override
+    public boolean sendFriendReq(FriendRequest friendRequest) {
+        boolean isRequestSend = false;
+
+        try {
+            conn = DriverManager.getConnection(url, db_user, password);
+            statement = conn.createStatement();
+
+            // Check if two are friends or already request
+
+            String sender = friendRequest.getSender();
+            String receiver = friendRequest.getReceiver();
+            String note = friendRequest.getNote();
+
+            String friend_req_check = "SELECT * FROM user_friends WHERE (req_sender = '" + sender
+                    + "' AND req_receiver = '" + receiver + "') OR (req_sender = '" + receiver
+                    + "' AND req_receiver = '" + sender + "')";
+
+            ResultSet rs = statement.executeQuery(friend_req_check);
+            if (rs.next()) {
+                String status = rs.getString("status");
+                if (status.equals("approved")) {
+                    System.out.println("You are friends already");
+                } else if (status.equals("pending")) {
+                    System.out.println("Friend request sent already");
+                } else if (status.equals("denied")) {
+                    System.out.println("The request has been denied. Sorry!");
+                }
+                return isRequestSend;
+            }
+
+            String query = "INSERT into user_friends(req_sender, req_receiver, note) VALUES('" + sender + "', '"
+                    + receiver + "', '" + note + "')";
+
+            int result = statement.executeUpdate(query);
+            if (result == 1) {
+                isRequestSend = true;
+                return isRequestSend;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return isRequestSend;
+        }
+
+        return isRequestSend;
+    }
 
     // // Posts: create a post, get posts, get post, update post, delete post
 
