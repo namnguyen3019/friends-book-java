@@ -10,6 +10,8 @@ public interface DataStorage {
 
     User userLogin(String username, String password);
 
+    boolean updateProfile(User updatedUser);
+
     // User friends relationship
     ArrayList<String> getFriendList(User user);
 

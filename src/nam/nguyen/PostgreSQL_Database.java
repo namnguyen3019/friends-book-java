@@ -92,6 +92,28 @@ public class PostgreSQL_Database implements DataStorage {
         return null;
     }
 
+    @Override
+    public boolean updateProfile(User updatedUser) {
+        try {
+            conn = DriverManager.getConnection(url, db_user, password);
+            statement = conn.createStatement();
+
+            String updateQuery = "UPDATE users set name = '" + updatedUser.getName() + "', school = '"
+                    + updatedUser.getSchool() + "' WHERE username = '" + updatedUser.getUsername() + "'";
+
+            int rs = statement.executeUpdate(updateQuery);
+            if (rs == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public boolean createPost(Post post) {
         boolean postCreated = false;
         try {
