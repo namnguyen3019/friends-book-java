@@ -145,6 +145,7 @@ public class PostgreSQL_Database implements DataStorage {
         return null;
     }
 
+    @Override
     public ArrayList<Post> getPosts(String username) {
         ArrayList<Post> currentPosts = new ArrayList<Post>();
 
@@ -175,6 +176,7 @@ public class PostgreSQL_Database implements DataStorage {
         return currentPosts;
     }
 
+    @Override
     public boolean updatePost(Post post) {
         boolean isUpdated = false;
         try {
@@ -454,40 +456,101 @@ public class PostgreSQL_Database implements DataStorage {
         return isRequestSend;
     }
 
-    // // Posts: create a post, get posts, get post, update post, delete post
-
-    // @Override
-    // public ArrayList<PostModel> getPosts(String username) {
-
-    // ArrayList<PostModel> Posts = new ArrayList<PostModel>();
-    // try {
-    // conn = DriverManager.getConnection(url, user, password);
-    // statement = conn.createStatement();
-
-    // String query = "Select * FROM posts WHERE owner_id = '" + username + "'";
-
-    // ResultSet rs = statement.executeQuery(query);
-    // while (rs.next()) {
-    // int post_id = rs.getInt(1);
-    // String content = rs.getString(2);
-    // String owner_id = rs.getString(3);
-    // Timestamp created_at = rs.getTimestamp(4);
-    // PostModel post = new PostModel(post_id, content, owner_id, created_at);
-    // System.out.println("post_id '" + post_id + "'");
-    // System.out.println("content '" + content + "'");
-    // System.out.println("owner_id '" + post_id + "'");
-    // System.out.println("created_at '" + created_at.toString() + "'");
-    // System.out.println("----------------");
-    // Posts.add(post);
-    // }
-
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
-
-    // return Posts;
-    // }
-
     // // Message: get new message, send message
+    @Override
+    public ArrayList<Message> getNewMessages(User user) {
+        ArrayList<Message> newMessages = new ArrayList<Message>();
+        try {
+            conn = DriverManager.getConnection(url, db_user, password);
+            statement = conn.createStatement();
 
+            String query = "Select * FROM message WHERE receiver = '" + user.getUsername() + "' AND read = false";
+            ResultSet rs = statement.executeQuery(query);
+
+            while (rs.next()) {
+                int message_id = rs.getInt(1);
+                String sender = rs.getString(2);
+                String receiver = rs.getString(3);
+                int parent_message_id = rs.getInt(4);
+                String content = rs.getString(5);
+                boolean read = rs.getBoolean(6);
+                Timestamp created_at = rs.getTimestamp(7);
+
+                Message message = new Message(message_id, sender, receiver, content, parent_message_id, read,
+                        created_at);
+                newMessages.add(message);
+            }
+            return newMessages;
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public ArrayList<Message> getConversationFromAFriend(User user, String user_friend) {
+        ArrayList<Message> conversation = new ArrayList<Message>();
+        try {
+            conn = DriverManager.getConnection(url, db_user, password);
+            statement = conn.createStatement();
+            String curUsername = user.getUsername();
+
+            // Get 5 most recent messages between 2 users
+            String query = "SELECT * FROM message WHERE (sender = '" + curUsername + "' AND receiver = '" + user_friend
+                    + "') OR (sender = '" + user_friend + "' AND receiver = '" + curUsername
+                    + "')ORDER BY created_at DESC LIMIT 5";
+
+            ResultSet rs = statement.executeQuery(query);
+            while (rs.next()) {
+                int id = rs.getInt(1);
+                String sender_id = rs.getString(2);
+                String receiver_id = rs.getString(3);
+                int parent_message_id = rs.getInt(4);
+                String content = rs.getString(5);
+                boolean read = rs.getBoolean(6);
+                Timestamp created_at = rs.getTimestamp(7);
+                Message message = new Message(id, sender_id, receiver_id, content, parent_message_id, read, created_at);
+
+                conversation.add(message);
+            }
+
+            return conversation;
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public boolean sendMessage(User user, String receiver, String messageContent) {
+        try {
+            conn = DriverManager.getConnection(url, db_user, password);
+            statement = conn.createStatement();
+
+            String queryLastMessage = "SELECT * FROM message WHERE (sender = '" + user.getUsername()
+                    + "' AND receiver = '" + receiver + "') OR (sender = '" + receiver + "' AND receiver = '"
+                    + user.getUsername() + "') ORDER BY created_at DESC LIMIT 1";
+            ResultSet rs = statement.executeQuery(queryLastMessage);
+            Integer parent_message_id = -1;
+            if (rs.next()) {
+                parent_message_id = rs.getInt("id");
+            }
+            String insertMessage = "INSERT into message(sender, receiver, parent_message_id, content) VALUES ('"
+                    + user.getUsername() + "', '" + receiver + "', '" + parent_message_id + "', '"
+                    + messageContent + "')";
+
+            int result = statement.executeUpdate(insertMessage);
+            if (result == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

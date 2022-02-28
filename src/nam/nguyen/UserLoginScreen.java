@@ -30,6 +30,8 @@ public class UserLoginScreen {
                 new PostScreen(user, d).showPostScreen();
             } else if (choice.equals("2")) {
                 new FriendsScreen(user, d).showMenu();
+            } else if (choice.equals("3")) {
+                new MessageScreen(user, d).showMenu();
             }
 
         }

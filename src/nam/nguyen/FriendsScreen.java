@@ -121,4 +121,5 @@ public class FriendsScreen {
             System.out.println("Failed to send");
         }
     }
+
 }

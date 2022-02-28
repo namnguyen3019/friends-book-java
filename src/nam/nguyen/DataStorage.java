@@ -10,7 +10,7 @@ public interface DataStorage {
 
     User userLogin(String username, String password);
 
-    // // User friend relationship
+    // User friends relationship
     ArrayList<String> getFriendList(User user);
 
     User getFriendByUsername(User user, String friend_username);
@@ -36,10 +36,12 @@ public interface DataStorage {
 
     boolean deletePost(int post_id, String owner_id);
 
-    // ArrayList<PostModel> getPosts(String username);
+    // Messages
 
-    // Message
+    ArrayList<Message> getNewMessages(User user);
 
-    // ArrayList<MessageModel> getNewMessages(String username);
+    ArrayList<Message> getConversationFromAFriend(User user, String user_friend);
+
+    boolean sendMessage(User username, String receiver, String messageContent);
 
 }
