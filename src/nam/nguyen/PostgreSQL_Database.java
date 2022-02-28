@@ -192,10 +192,8 @@ public class PostgreSQL_Database implements DataStorage {
 
         } catch (Exception e) {
             e.printStackTrace();
-            // TODO: handle exception
+            return null;
         }
-
-        return currentPosts;
     }
 
     @Override
@@ -571,6 +569,28 @@ public class PostgreSQL_Database implements DataStorage {
             }
         } catch (Exception e) {
             // TODO: handle exception
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean addNewComment(User user, Comment newComment) {
+        try {
+            conn = DriverManager.getConnection(url, db_user, password);
+            statement = conn.createStatement();
+
+            String insertQuery = "INSERT INTO comment(post_id, owner_username, content) VALUES ('"
+                    + newComment.getPost_id() + "', '" + newComment.getOwner_username() + "', '"
+                    + newComment.getContent() + "')";
+
+            int result = statement.executeUpdate(insertQuery);
+            if (result == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }

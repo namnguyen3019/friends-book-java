@@ -27,7 +27,7 @@ public interface DataStorage {
 
     ArrayList<String> friendSuggestionList(User user);
 
-    // Posts
+    // Posts and Comment
     boolean createPost(Post post);
 
     ArrayList<Post> getPosts(String username);
@@ -38,6 +38,7 @@ public interface DataStorage {
 
     boolean deletePost(int post_id, String owner_id);
 
+    boolean addNewComment(User user, Comment newComment);
     // Messages
 
     ArrayList<Message> getNewMessages(User user);

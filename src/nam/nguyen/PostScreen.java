@@ -23,6 +23,8 @@ public class PostScreen {
             System.out.println("3. Create a post");
             System.out.println("4. Update a post");
             System.out.println("5. Delete a post");
+            System.out.println("6. Show your friends' posts");
+            System.out.println("7. Add a new comment on a post");
             System.out.println("x. return");
 
             choice = input.next();
@@ -43,13 +45,18 @@ public class PostScreen {
                 case "5":
                     deletePost(user, d);
                     break;
+                case "6":
+                    showFriendsPosts(user, d);
+                    break;
+                case "7":
+                    addNewComment(user, d);
                 default:
                     break;
             }
         }
     }
 
-    // Show current posts
+    // Show current posts of the current users
     private void showCurrentPosts(User user, DataStorage d) {
         ArrayList<Post> currentPosts = user.getPosts(d);
         for (Post p : currentPosts) {
@@ -57,7 +64,7 @@ public class PostScreen {
         }
     }
 
-    // Show post by Id
+    // Show current user's post by Id
     private void showPostById(User user, DataStorage d) {
         Scanner input = new Scanner(System.in);
         System.out.println("Enter post id");
@@ -69,6 +76,23 @@ public class PostScreen {
         System.out.println("content:  '" + post.getContent() + "' ");
         System.out.println("created_at:  '" + post.getCreated_at() + "' ");
         System.out.println("updated_at:  '" + post.getUpdated_at() + "' ");
+    }
+
+    // Show your friends' current posts
+    private void showFriendsPosts(User user, DataStorage d) {
+
+        ArrayList<String> friends = d.getFriendList(user);
+        ArrayList<Post> friendsPosts = new ArrayList<Post>();
+        for (String friend : friends) {
+            ArrayList<Post> currentPosts = d.getPosts(friend);
+            for (Post p : currentPosts) {
+                friendsPosts.add(p);
+            }
+        }
+
+        for (Post p : friendsPosts) {
+            System.out.println(p.getPost_id() + ": " + p.getOwner_id() + ": " + p.getContent());
+        }
     }
 
     // Create a new post
@@ -114,6 +138,28 @@ public class PostScreen {
                 System.out.println("Failed!");
             }
         }
+    }
+
+    private void addNewComment(User user, DataStorage d) {
+        // Show posts from friends
+        showFriendsPosts(user, d);
+        Scanner input = new Scanner(System.in);
+
+        System.out.println("Enter post id");
+        Integer inputPostId = input.nextInt();
+        input.nextLine();
+        System.out.println("Your comment: ");
+        String inputContent = input.nextLine();
+
+        Comment newComment = new Comment(inputPostId, user.getUsername(), inputContent);
+
+        boolean isCommentAdded = d.addNewComment(user, newComment);
+        if (isCommentAdded) {
+            System.out.println("added a new comment");
+        } else {
+            System.out.println("Add comment failed! ");
+        }
+
     }
 }
 
