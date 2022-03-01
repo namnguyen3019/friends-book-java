@@ -15,6 +15,7 @@ public class PostgreSQL_Database implements DataStorage {
     final String password = "123456";
     Connection conn = null;
     Statement statement = null;
+    ResultSet rs = null;
 
     /*
      * User functions: createAuser, userLogin
@@ -29,7 +30,7 @@ public class PostgreSQL_Database implements DataStorage {
             conn.setAutoCommit(false);
             String queryUser = "SELECT 1 FROM users WHERE username = '" + username.toLowerCase() + "'";
 
-            ResultSet rs = statement.executeQuery(queryUser);
+            rs = statement.executeQuery(queryUser);
             if (rs.next()) {
                 System.out.println("user already exists");
                 return isUserCreated;
@@ -39,22 +40,18 @@ public class PostgreSQL_Database implements DataStorage {
             if (insertResult == 1) {
                 conn.commit();
                 conn.setAutoCommit(true);
-                System.out.println("New account has been created");
                 isUserCreated = true;
                 return isUserCreated;
             } else {
-                System.out.println("Oh no cannot create a new account");
                 return isUserCreated;
             }
-
         } catch (SQLException e) {
-            // handle the exceptions
-            System.out.println("Account creation failed");
             e.printStackTrace();
             return isUserCreated;
-
         } finally {
+            // close the database
             try {
+                rs.close();
                 statement.close();
                 conn.close();
             } catch (Exception e) {
@@ -72,24 +69,29 @@ public class PostgreSQL_Database implements DataStorage {
             String query = "SELECT username, name, school from users WHERE users.username = '" + username
                     + "' AND users.password = '" + password + "' LIMIT 1";
 
-            ResultSet resultSet = statement.executeQuery(query);
-            if (resultSet.next()) {
-                username = resultSet.getString("username");
-                String name = resultSet.getString("name");
-                String school = resultSet.getString("school");
+            rs = statement.executeQuery(query);
+            if (rs.next()) {
+                username = rs.getString("username");
+                String name = rs.getString("name");
+                String school = rs.getString("school");
                 userInfo = new User(username, name, school);
-
-                System.out.println("Welcome to Frendsbook '" + username + "'");
                 return userInfo;
             } else {
-                System.out.println("User not found or wrong password!");
                 return null;
             }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
+            return null;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        return null;
     }
 
     @Override
@@ -128,14 +130,21 @@ public class PostgreSQL_Database implements DataStorage {
                 postCreated = true;
                 return postCreated;
             } else {
-                System.out.println(" Failed to create a new post");
+                return postCreated;
             }
         } catch (Exception e) {
-            System.out.println("Post creation failed");
             e.printStackTrace();
+            return postCreated;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-
-        return postCreated;
     }
 
     @Override
@@ -147,24 +156,31 @@ public class PostgreSQL_Database implements DataStorage {
             String query = "Select * FROM posts WHERE post_id = '" + post_id
                     + "' and owner_id = '" + username + "'";
 
-            ResultSet rs = statement.executeQuery(query);
+            rs = statement.executeQuery(query);
             if (rs.next()) {
                 int postId = rs.getInt(1);
                 String content = rs.getString(2);
                 String owner_id = rs.getString(3);
                 Timestamp created_at = rs.getTimestamp(4);
                 Timestamp updated_at = rs.getTimestamp(5);
-                Post returnPost = new Post(postId, content, owner_id, created_at, updated_at);
-
-                return returnPost;
+                Post Post = new Post(postId, content, owner_id, created_at, updated_at);
+                return Post;
+            } else {
+                return null;
             }
-
         } catch (Exception e) {
-            // TODO: handle exception
             e.printStackTrace();
             return null;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        return null;
     }
 
     @Override
@@ -193,6 +209,15 @@ public class PostgreSQL_Database implements DataStorage {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -217,10 +242,18 @@ public class PostgreSQL_Database implements DataStorage {
                 return isUpdated;
             }
         } catch (Exception e) {
-            // TODO: handle exception
             e.printStackTrace();
+            return false;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        return isUpdated;
     }
 
     @Override
@@ -242,8 +275,17 @@ public class PostgreSQL_Database implements DataStorage {
         } catch (Exception e) {
             // TODO: handle exception
             e.printStackTrace();
+            return false;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        return false;
     }
 
     /*
@@ -271,15 +313,24 @@ public class PostgreSQL_Database implements DataStorage {
                     friendList.add(user_1);
                 }
             }
+            return friendList;
         } catch (Exception e) {
             e.printStackTrace();
+            return friendList;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        return friendList;
     }
 
     @Override
     public User getFriendByUsername(User curUser, String friend_username) {
-
         try {
             conn = DriverManager.getConnection(url, db_user, password);
             statement = conn.createStatement();
@@ -297,12 +348,22 @@ public class PostgreSQL_Database implements DataStorage {
                 String school = rs.getString(3);
                 User friend = new User(username, name, school);
                 return friend;
+            } else {
+                return null;
             }
         } catch (Exception e) {
-            // TODO: handle exception
             e.printStackTrace();
+            return null;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        return null;
     }
 
     @Override
@@ -338,11 +399,18 @@ public class PostgreSQL_Database implements DataStorage {
             return friendRequestsList;
 
         } catch (Exception e) {
-            // TODO: handle exception
             e.printStackTrace();
+            return null;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-
-        return friendRequestsList;
     }
 
     @Override
@@ -362,9 +430,17 @@ public class PostgreSQL_Database implements DataStorage {
                 return false;
             }
         } catch (Exception e) {
-            // TODO: handle exception
             e.printStackTrace();
             return false;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -388,6 +464,15 @@ public class PostgreSQL_Database implements DataStorage {
             // TODO: handle exception
             e.printStackTrace();
             return false;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -425,6 +510,15 @@ public class PostgreSQL_Database implements DataStorage {
         } catch (Exception e) {
             e.printStackTrace();
             return friendSuggestionList;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
     }
@@ -457,9 +551,9 @@ public class PostgreSQL_Database implements DataStorage {
                 } else if (status.equals("denied")) {
                     System.out.println("The request has been denied. Sorry!");
                 }
+                isRequestSend = true;
                 return isRequestSend;
             }
-
             String query = "INSERT into user_friends(req_sender, req_receiver, note) VALUES('" + sender + "', '"
                     + receiver + "', '" + note + "')";
 
@@ -467,13 +561,22 @@ public class PostgreSQL_Database implements DataStorage {
             if (result == 1) {
                 isRequestSend = true;
                 return isRequestSend;
+            } else {
+                return false;
             }
         } catch (Exception e) {
             e.printStackTrace();
             return isRequestSend;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-
-        return isRequestSend;
     }
 
     // // Message: get new message, send message
@@ -505,6 +608,15 @@ public class PostgreSQL_Database implements DataStorage {
             // TODO: handle exception
             e.printStackTrace();
             return null;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -540,6 +652,15 @@ public class PostgreSQL_Database implements DataStorage {
             // TODO: handle exception
             e.printStackTrace();
             return null;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -568,9 +689,17 @@ public class PostgreSQL_Database implements DataStorage {
                 return false;
             }
         } catch (Exception e) {
-            // TODO: handle exception
             e.printStackTrace();
             return false;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -593,6 +722,15 @@ public class PostgreSQL_Database implements DataStorage {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        } finally {
+            // close the database
+            try {
+                rs.close();
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }
