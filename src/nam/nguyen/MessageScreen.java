@@ -3,15 +3,18 @@ package nam.nguyen;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class MessageScreen {
     DataStorage d;
     User user;
+    NotificationScreen notice;
 
-    public MessageScreen(User user, DataStorage d) {
+    public MessageScreen(User user, DataStorage d, NotificationScreen notice) {
         this.user = user;
         this.d = d;
+        this.notice = notice;
     }
 
     public void showMenu() {
@@ -23,6 +26,7 @@ public class MessageScreen {
             System.out.println("1. Show new messages");
             System.out.println("2. Send a message to friend");
             System.out.println("3. Show message from a friend");
+            System.out.println("x. x to quit");
             choice = input.next().toLowerCase();
 
             if (choice.equals("1")) {
@@ -37,12 +41,46 @@ public class MessageScreen {
     }
 
     private void getNewMessages(User user, DataStorage d) {
+        Scanner input = new Scanner(System.in);
         ArrayList<Message> newMessages = d.getNewMessages(user);
-        for (int i = 0; i < newMessages.size(); i++) {
-            Message m = newMessages.get(i);
-            System.out.println(i + 1 + ". From " + m.getSender_id() + ": " + m.getContent());
+        if (newMessages.size() == 0) {
+            System.out.println("No new message!");
+        } else {
+            HashMap<Integer, Message> choices = new HashMap<Integer, Message>();
+            for (int i = 0; i < newMessages.size(); i++) {
+                Message m = newMessages.get(i);
+                System.out.println(i + 1 + ". From " + m.getSender_id() + ": " + m.getContent());
+                choices.put(i + 1, m);
+            }
+
+            String inputChoice = "";
+            while (!inputChoice.toLowerCase().equals("x")) {
+                if (newMessages.size() == 0) {
+                    break;
+                }
+                System.out.println("Choose message to show: or 'x' to quit ");
+                inputChoice = input.next();
+                if (inputChoice.equals("x")) {
+                    break;
+                }
+                int inputInt = Integer.parseInt(inputChoice);
+                Message m = choices.get(inputInt);
+                if (m != null) {
+                    System.out.println(m.getSender_id());
+                    for (int i = 0; i < newMessages.size(); i++) {
+                        if (newMessages.get(i).getMessage_id() == m.getMessage_id()) {
+                            newMessages.remove(i);
+                        }
+                    }
+                    d.updateReadMessage(user, m.getMessage_id());
+                    // Remove the message from notification
+                    notice.removeNewMessagNotice(m.getMessage_id());
+                }
+
+            }
+
         }
-        System.out.println("End !");
+
     }
 
     public void showConverstion(User user, DataStorage d) {
@@ -51,11 +89,11 @@ public class MessageScreen {
         String inputFriend = input.next().toLowerCase();
 
         // Check if the friend in on database
-        User friend = d.getFriendByUsername(user, inputFriend);
-        if (friend == null) {
-            System.out.println("Can't find your friend");
+        boolean isFriend = d.isFriend(user.getUsername(), inputFriend);
+        if (!isFriend) {
+            System.out.println("You're not friends yet");
         } else {
-            ArrayList<Message> conversation = d.getConversationFromAFriend(user, friend.getUsername());
+            ArrayList<Message> conversation = d.getConversationFromAFriend(user, inputFriend);
             if (conversation.size() == 0) {
                 System.out.println("No message yet");
             }

@@ -7,10 +7,14 @@ public class FriendsScreen {
 
     private DataStorage d;
     private User user;
+    private ArrayList<String> friendList = new ArrayList<String>();
+    NotificationScreen notice;
 
-    public FriendsScreen(User user, DataStorage d) {
+    public FriendsScreen(User user, DataStorage d, NotificationScreen notice) {
         this.d = d;
         this.user = user;
+        this.friendList = d.getFriendList(user);
+        this.notice = notice;
     }
 
     public void showMenu() {
@@ -39,18 +43,27 @@ public class FriendsScreen {
                     break;
                 case "3":
                     showFriendRequest(user, d);
+                    break;
                 case "4":
                     showFriendSuggestions(user, d);
+                    break;
                 case "5":
                     sendFriendReq(user, d);
+                    break;
             }
         }
     }
 
     private void showFriendList(User user, DataStorage d) {
-        ArrayList<String> friendList = d.getFriendList(user);
-        for (String friend : friendList) {
-            System.out.println(friend);
+        if (friendList.size() == 0) {
+            System.out.println(
+                    "You have no friend yet. Add new friends to see more");
+        } else {
+            System.out.println("Some friends in your list");
+            for (int i = 0; i <= 5 && i < friendList.size(); i++) {
+                System.out.println(friendList.get(i));
+            }
+
         }
     }
 
@@ -60,8 +73,12 @@ public class FriendsScreen {
         String friend_username = input.next();
 
         User friend = d.getFriendByUsername(user, friend_username);
+        if (friend != null) {
+            System.out.println("Name: " + friend.getName() + ", school: " + friend.getSchool());
+        } else {
+            System.out.println(friend_username + " is not in your friend list");
+        }
 
-        System.out.println("Name: " + friend.getName() + ", school: " + friend.getSchool());
     }
 
     private void showFriendRequest(User user, DataStorage d) {
@@ -71,6 +88,9 @@ public class FriendsScreen {
             System.out.println("No friend request");
         } else {
             for (FriendRequest friendRequest : friendReqList) {
+                // Remove from notificaitons
+                notice.removeFriendReqNotice(friendRequest.getFriend_req_id());
+
                 System.out.println("A req from : '" + friendRequest.getSender() + "' at '"
                         + friendRequest.getCreated_at().toString() + "'");
 
@@ -94,22 +114,28 @@ public class FriendsScreen {
                 } else if (userInput.equals("x")) {
                     break;
                 }
+
             }
         }
     }
 
     private void showFriendSuggestions(User user, DataStorage d) {
 
-        System.out.println("People who might know: ");
+        System.out.println("People who you might know: ");
         ArrayList<String> suggestedFriendList = d.friendSuggestionList(user);
-        for (String friend : suggestedFriendList) {
-            System.out.println(friend);
+        if (suggestedFriendList.size() == 0) {
+            System.out.println("No suggestion yet");
+        } else {
+            for (String friend : suggestedFriendList) {
+                System.out.println(friend);
+            }
         }
+
     }
 
     private void sendFriendReq(User user, DataStorage d) {
         Scanner input = new Scanner(System.in);
-        System.out.println("Enter username:");
+        System.out.println("Add new friend with username:");
         String req_receiver = input.next();
         System.out.println("Send a note: ");
         String note = input.next();

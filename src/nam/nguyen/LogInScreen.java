@@ -2,10 +2,10 @@ package nam.nguyen;
 
 import java.util.Scanner;
 
-public class UserCreator {
+public class LogInScreen {
     private DataStorage data;
 
-    public UserCreator(DataStorage d) {
+    public LogInScreen(DataStorage d) {
         data = d;
     }
 

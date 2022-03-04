@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public interface DataStorage {
 
-    // Users
+    // User
 
     boolean createUser(String username, String password, String name, String school);
 
@@ -17,6 +17,8 @@ public interface DataStorage {
 
     User getFriendByUsername(User user, String friend_username);
 
+    boolean isFriend(String username1, String username2);
+
     ArrayList<FriendRequest> getFriendRequestList(User user);
 
     boolean acceptFriendReq(User user, int friend_req_id);
@@ -26,6 +28,8 @@ public interface DataStorage {
     boolean sendFriendReq(FriendRequest friendRequest);
 
     ArrayList<String> friendSuggestionList(User user);
+
+    FriendRequest getFriendReqById(User user, int id);
 
     // Posts and Comment
     boolean createPost(Post post);
@@ -41,10 +45,17 @@ public interface DataStorage {
     boolean addNewComment(User user, Comment newComment);
     // Messages
 
+    Message getMessageById(User user, int messageId);
+
+    boolean updateReadMessage(User user, int messageId);
+
     ArrayList<Message> getNewMessages(User user);
 
     ArrayList<Message> getConversationFromAFriend(User user, String user_friend);
 
     boolean sendMessage(User username, String receiver, String messageContent);
+
+    // Notifications
+    ArrayList<Notification> getNotifications(User user);
 
 }

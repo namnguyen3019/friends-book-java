@@ -19,16 +19,18 @@ public class FriendsBook {
             System.out.println(choice);
             if (choice.equals("1")) {
                 // Register
-                new UserCreator(data).register();
+                new LogInScreen(data).register();
             } else if (choice.equals("2")) {
-                User curUser = new UserCreator(data).login();
+                User curUser = new LogInScreen(data).login();
                 if (curUser != null) {
-                    new UserLoginScreen(curUser, data).showMenu();
+                    UserScreen currentUser = new UserScreen(curUser, data);
+                    currentUser.showNotifications();
+                    currentUser.showMenu();
+                } else {
+                    System.out.println("user not found or wrong password");
                 }
-
             }
         }
-
         input.close();
     }
 }
