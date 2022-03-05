@@ -2,4 +2,4 @@
 
 ## Database Schema
 
-![Screen Shot 2022-03-01 at 10 54 31 AM](https://user-images.githubusercontent.com/60663173/156214872-a68c2783-6dea-47fb-818a-71dc08833273.png)
+![Screen Shot 2022-03-05 at 9 32 40 AM](https://user-images.githubusercontent.com/60663173/156890741-29283927-40ac-43f7-b809-86dad0bdf803.png)
