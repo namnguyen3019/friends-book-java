@@ -17,6 +17,12 @@ public class Notification {
         this.created_at = created_at;
     }
 
+    public Notification(String username, String type_of_notice, Integer messageId) {
+        this.username = username;
+        this.type_of_notice = type_of_notice;
+        this.message_or_friend_req_id = messageId;
+    }
+
     public String getUsername() {
         return username;
     }

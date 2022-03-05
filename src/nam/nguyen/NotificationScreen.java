@@ -22,36 +22,11 @@ public class NotificationScreen {
         this.newMessageList = newMessageList;
     }
 
-    public ArrayList<Notification> showNotifications() {
-        notificationList = d.getNotifications(user);
-
-        if (notificationList.size() == 0) {
-            System.out.println("No new notifications ");
-        } else {
-            int numOfNo = notificationList.size();
-            int numOfFriendReq = 0;
-            int numOfNewMessage = 0;
-            System.out.println("You are having " + numOfNo + " new notifications! ");
-            for (Notification n : notificationList) {
-                if (n.getType_of_notice().equals("FriendRequest")) {
-                    numOfFriendReq += 1;
-                    friendRequestList.add(n);
-                } else if (n.getType_of_notice().equals("NewMessage")) {
-                    numOfNewMessage += 1;
-                    newMessageList.add(n);
-                }
-            }
-            if (numOfFriendReq > 0) {
-                System.out.println("You are having " + numOfFriendReq + " friend request(s)");
-            }
-            if (numOfNewMessage > 0) {
-                System.out.println("You are having " + numOfNewMessage + " new message(s)");
-            }
-        }
-        return notificationList;
-    }
-
     public void showNotificationsDetails() {
+        if (notificationList.size() == 0) {
+            System.out.println("You have no new notifications");
+            return;
+        }
         Scanner input = new Scanner(System.in);
 
         String inputChoice = "";
@@ -72,14 +47,15 @@ public class NotificationScreen {
 
     private void showFriendReq(ArrayList<Notification> friendRequestList, Scanner input) {
         int i = 0;
-        Set<Integer> friendReqIdSset = new HashSet<Integer>();
+        Set<Integer> friendReqIdSet = new HashSet<Integer>();
+
         for (; i < friendRequestList.size(); i++) {
             Notification friendReq = friendRequestList.get(i);
             String noticeType = friendReq.getType_of_notice();
             int friendReqId = friendReq.getMessage_or_friend_req_id();
             System.out.println(i + 1 + ". " + noticeType + ", id: "
                     + friendReqId);
-            friendReqIdSset.add(friendReqId);
+            friendReqIdSet.add(friendReqId);
         }
 
         String reqIdChoice = "";
@@ -90,7 +66,7 @@ public class NotificationScreen {
                 break;
             }
             int id = Integer.parseInt(reqIdChoice);
-            if (friendReqIdSset.contains(id)) {
+            if (friendReqIdSet.contains(id)) {
                 FriendRequest friendRequest = d.getFriendReqById(user, id);
                 System.out.println("Sender:" + friendRequest.getSender());
                 System.out.println("Note: " + friendRequest.getNote());
@@ -98,16 +74,17 @@ public class NotificationScreen {
 
                 // remove notice from list
                 for (int j = 0; j < n; j++) {
-                    if (friendRequestList.get(j).getMessage_or_friend_req_id().equals(id)) {
+                    if (friendRequestList.get(j).getMessage_or_friend_req_id() == id) {
                         friendRequestList.remove(j);
                         break;
                     }
                 }
-                friendReqIdSset.remove(id);
+                friendReqIdSet.remove(id);
+                d.deleteNotification(id);
             }
 
-            if (friendReqIdSset.size() == 0) {
-                System.out.println("No more friend request");
+            if (friendReqIdSet.size() == 0) {
+                System.out.println("No more new friend request");
                 break;
             }
         }

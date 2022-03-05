@@ -25,7 +25,7 @@ public class MessageScreen {
             System.out.println("Choice an option: ");
             System.out.println("1. Show new messages");
             System.out.println("2. Send a message to friend");
-            System.out.println("3. Show message from a friend");
+            System.out.println("3. Show last conversation with a friend");
             System.out.println("x. x to quit");
             choice = input.next().toLowerCase();
 
@@ -66,7 +66,11 @@ public class MessageScreen {
                 int inputInt = Integer.parseInt(inputChoice);
                 Message m = choices.get(inputInt);
                 if (m != null) {
-                    System.out.println(m.getSender_id());
+                    System.out.println("Sender: " + m.getSender_id());
+                    System.out.println("Content: " + m.getContent());
+                    Date date = new Date(m.getCreated_at().getTime());
+                    String dateString = new SimpleDateFormat("hh:mm:ss MM-dd-yy").format(date);
+                    System.out.println("sent at: " + dateString);
                     for (int i = 0; i < newMessages.size(); i++) {
                         if (newMessages.get(i).getMessage_id() == m.getMessage_id()) {
                             newMessages.remove(i);
@@ -75,6 +79,7 @@ public class MessageScreen {
                     d.updateReadMessage(user, m.getMessage_id());
                     // Remove the message from notification
                     notice.removeNewMessagNotice(m.getMessage_id());
+                    d.deleteNotification(m.getMessage_id());
                 }
 
             }
@@ -101,7 +106,7 @@ public class MessageScreen {
                 Message m = conversation.get(i);
                 Date date = new Date(m.getCreated_at().getTime());
                 String dateString = new SimpleDateFormat("hh:mm:ss MM-dd-yy").format(date);
-                System.out.println(m.getSender_id() + ": " + m.getContent() + " at " + dateString);
+                System.out.println(dateString + ": " + m.getSender_id() + ": " + m.getContent());
             }
         }
     }

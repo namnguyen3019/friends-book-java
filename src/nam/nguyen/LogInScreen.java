@@ -18,10 +18,13 @@ public class LogInScreen {
         Scanner input = new Scanner(System.in);
         boolean loginReq = false;
 
-        // Check the requirement for login ID
-        String usernaemPattern = "^[a-zA-Z]\\w{2,10}$";
+        /**
+         * Username: from 3- 19 character, start with a character, at least 1 number
+         */
+        String usernaemPattern = "^[a-zA-Z]\\w*\\d+{2,10}$";
         while (!loginReq) {
             System.out.println("Enter loginid from 3 - 10");
+            System.out.println("Start with a character, at least 1 number");
             loginId = input.next().toLowerCase();
             if (loginId.matches(usernaemPattern)) {
                 loginReq = true;
@@ -29,28 +32,43 @@ public class LogInScreen {
                 System.out.println("Username not  match");
             }
         }
-        // Enter password
-        String passwordPattern = "^.{3,}$";
+        /**
+         * Minimum eight characters,
+         * at least one uppercase letter,
+         * one lowercase letter and one number, 1 special character
+         */
+        String passwordPattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";
         boolean passwordReq = false;
         while (!passwordReq) {
             System.out.println("Enter password");
+            System.out
+                    .println(
+                            "Required: at least 8 characters, 1 lowercase, 1 uppsercase, 1 one number, 1 special character");
             password = input.next();
             if (password.equals(loginId)) {
                 System.out.println("password cannot be the same as login ID");
             } else if (password.matches(passwordPattern)) {
                 passwordReq = true;
             } else {
-                System.out.println(" Password not match requirements");
+                System.out.println(" Password not match the requirements");
             }
         }
 
         System.out.println("Enter name: ");
-        name = input.next();
+        input.nextLine();
+        name = input.nextLine();
         System.out.println("Enter your school: ");
-        school = input.next();
+        school = input.nextLine();
         System.out.println("Your account is being created! Please wait");
 
-        return data.createUser(loginId, password, name, school);
+        boolean isUserCreated = data.createUser(loginId, password, name, school);
+        if (isUserCreated) {
+            System.out.println("New user created");
+        } else {
+            System.out.println("Failed to create a new user");
+        }
+
+        return isUserCreated;
     }
 
     public User login() {

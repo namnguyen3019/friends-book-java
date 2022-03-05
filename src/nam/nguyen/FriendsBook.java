@@ -3,10 +3,9 @@ package nam.nguyen;
 import java.util.Scanner;
 
 public class FriendsBook {
-
     public static void main(String[] args) {
 
-        DataStorage data = new PostgreSQL_Database();
+        DataStorage data = new MySQL_Database();
         Scanner input = new Scanner(System.in);
         String choice = "";
 

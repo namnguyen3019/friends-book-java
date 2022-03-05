@@ -16,7 +16,7 @@ public class UserScreen {
 
     public ArrayList<Notification> showNotifications() {
         ArrayList<Notification> notificationList = d.getNotifications(user);
-        ArrayList<Notification> friendRequestList = new ArrayList<Notification>();
+        ArrayList<Notification> newFriendReqList = new ArrayList<Notification>();
         ArrayList<Notification> newMessageList = new ArrayList<Notification>();
         if (notificationList.size() == 0) {
             System.out.println("No new notification ");
@@ -28,7 +28,7 @@ public class UserScreen {
             for (Notification n : notificationList) {
                 if (n.getType_of_notice().equals("FriendRequest")) {
                     numOfFriendReq += 1;
-                    friendRequestList.add(n);
+                    newFriendReqList.add(n);
                 } else if (n.getType_of_notice().equals("NewMessage")) {
                     numOfNewMessage += 1;
                     newMessageList.add(n);
@@ -41,7 +41,7 @@ public class UserScreen {
                 System.out.println("You are having " + numOfNewMessage + " new message(s)");
             }
         }
-        notice = new NotificationScreen(user, d, notificationList, friendRequestList, newMessageList);
+        notice = new NotificationScreen(user, d, notificationList, newFriendReqList, newMessageList);
         return notificationList;
     }
 
@@ -54,7 +54,7 @@ public class UserScreen {
             System.out.println("2. Friends Screen: See friends and friend request ");
             System.out.println("3. Messages");
             System.out.println("4. Notifications");
-            System.out.println("5. Update your profile");
+            System.out.println("5. Show/Update your profile");
             System.out.println("x. return");
 
             choice = input.next();
@@ -67,12 +67,18 @@ public class UserScreen {
                 new MessageScreen(user, d, notice).showMenu();
             } else if (choice.equals("4")) {
                 notice.showNotificationsDetails();
-                ;
             } else if (choice.equals("5")) {
+                showProfile(user);
                 updateProfile(user, d);
             }
 
         }
+    }
+
+    private void showProfile(User user) {
+        System.out.println("username: " + user.getUsername() + "");
+        System.out.println("name: " + user.getName() + "");
+        System.out.println("school: " + user.getSchool() + "");
     }
 
     private void updateProfile(User user, DataStorage d) {
@@ -81,15 +87,23 @@ public class UserScreen {
         String inputName = input.nextLine().strip();
         System.out.println("Update your school: ");
         String inputSchool = input.nextLine().strip();
+        boolean isUserUpdated = false;
+        if (inputName != null && inputSchool != null) {
+            User updatedUser = new User(user.getUsername(), inputName, inputSchool);
+            isUserUpdated = d.updateProfile(updatedUser);
+        } else if (inputName != null) {
+            User updatedUser = new User(user.getUsername(), inputName, user.getSchool());
+            isUserUpdated = d.updateProfile(updatedUser);
 
-        User updatedUser = new User(user.getUsername(), inputName, inputSchool);
-        boolean isUserUpdated = d.updateProfile(updatedUser);
+        } else if (inputSchool != null) {
+            User updatedUser = new User(user.getUsername(), inputName, user.getSchool());
+            isUserUpdated = d.updateProfile(updatedUser);
+        }
         if (isUserUpdated) {
             System.out.println("Updated successully");
         } else {
             System.out.println("Failed to update");
         }
-
     }
 
 }

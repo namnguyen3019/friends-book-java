@@ -59,6 +59,10 @@ public class PostScreen {
     // Show current posts of the current users
     private void showCurrentPosts(User user, DataStorage d) {
         ArrayList<Post> currentPosts = user.getPosts(d);
+        if (currentPosts.size() == 0) {
+            System.out.println("You have no post yet");
+            return;
+        }
         for (Post p : currentPosts) {
             System.out.println("'" + Integer.toString(p.getPost_id()) + "'. '" + p.getContent() + "'");
         }
@@ -83,6 +87,10 @@ public class PostScreen {
 
         ArrayList<String> friends = d.getFriendList(user);
         ArrayList<Post> friendsPosts = new ArrayList<Post>();
+        if (friendsPosts.size() == 0) {
+            System.out.println("No post from friends");
+            return;
+        }
         for (String friend : friends) {
             ArrayList<Post> currentPosts = d.getPosts(friend);
             for (Post p : currentPosts) {
@@ -101,7 +109,7 @@ public class PostScreen {
         String new_content = "";
         while (new_content.length() < 1) {
             System.out.println("Insert new content");
-            new_content = inputContent.next();
+            new_content = inputContent.nextLine();
         }
         Post new_post = new Post(new_content, user.getUsername());
         user.createPost(new_post, d);
@@ -112,8 +120,9 @@ public class PostScreen {
         Scanner input = new Scanner(System.in);
         System.out.println("Enter post id");
         String post_id = input.next();
+        input.nextLine();
         System.out.println("Enter new content");
-        String new_content = input.next();
+        String new_content = input.nextLine();
         Post updatedPost = new Post(Integer.parseInt(post_id), new_content, user.getUsername());
         boolean isUpdated = user.updatePost(updatedPost, d);
         if (isUpdated) {
@@ -130,12 +139,12 @@ public class PostScreen {
         String post_id = input.next();
         System.out.println("Are you sure to delete this post '" + post_id + "', (y/n):");
         String answer = input.next();
-        if (answer.toLowerCase().equals("y")) {
+        if (answer.toLowerCase().equals("y") | answer.toLowerCase().equals("yes")) {
             boolean isDeleteSuccess = user.deletePost(Integer.parseInt(post_id), user.getUsername(), d);
             if (isDeleteSuccess) {
                 System.out.println("Done!");
             } else {
-                System.out.println("Failed!");
+                System.out.println("This post is not yours or could not find this post!");
             }
         }
     }

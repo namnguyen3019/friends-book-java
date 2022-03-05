@@ -8,11 +8,11 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
-public class PostgreSQL_Database implements DataStorage {
+public class MySQL_Database implements DataStorage {
 
-    final String url = "jdbc:postgresql://localhost:5432/friendsbook";
-    final String db_user = "namnguyen";
-    final String password = "123456";
+    final String url = "jdbc:mysql://mis-sql.uhcl.edu/nguyenn7653?useSSL=false";
+    final String db_user = "nguyenn7653";
+    final String db_password = "1898393";
     Connection conn = null;
     Statement statement = null;
     ResultSet rs = null;
@@ -25,7 +25,7 @@ public class PostgreSQL_Database implements DataStorage {
     public boolean createUser(String username, String password, String name, String school) {
         boolean isUserCreated = false;
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
             conn.setAutoCommit(false);
             String queryUser = "SELECT 1 FROM users WHERE username = '" + username.toLowerCase() + "'";
@@ -64,7 +64,7 @@ public class PostgreSQL_Database implements DataStorage {
     public User userLogin(String username, String password) {
         User userInfo = null;
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
             String query = "SELECT username, name, school from users WHERE users.username = '" + username
                     + "' AND users.password = '" + password + "' LIMIT 1";
@@ -97,7 +97,7 @@ public class PostgreSQL_Database implements DataStorage {
     @Override
     public boolean updateProfile(User updatedUser) {
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String updateQuery = "UPDATE users set name = '" + updatedUser.getName() + "', school = '"
@@ -118,7 +118,7 @@ public class PostgreSQL_Database implements DataStorage {
     public boolean createPost(Post post) {
         boolean postCreated = false;
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String query = "INSERT INTO posts(owner_id, content) VALUES('" + post.getOwner_id() + "', '"
@@ -149,7 +149,7 @@ public class PostgreSQL_Database implements DataStorage {
     @Override
     public Post getPostById(int post_id, String username) {
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String query = "Select * FROM posts WHERE post_id = '" + post_id
@@ -187,11 +187,11 @@ public class PostgreSQL_Database implements DataStorage {
         ArrayList<Post> currentPosts = new ArrayList<Post>();
 
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String query = "SELECT * FROM posts WHERE owner_id = '" + username + "' LIMIT 5";
-            ResultSet rs = statement.executeQuery(query);
+            rs = statement.executeQuery(query);
 
             while (rs.next()) {
                 Integer post_id = rs.getInt(1);
@@ -224,7 +224,7 @@ public class PostgreSQL_Database implements DataStorage {
     public boolean updatePost(Post post) {
         boolean isUpdated = false;
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String query = "UPDATE posts SET content = '" + post.getContent()
@@ -258,7 +258,7 @@ public class PostgreSQL_Database implements DataStorage {
     @Override
     public boolean deletePost(int post_id, String owner_id) {
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String query = "DELETE FROM posts WHERE post_id = '" + post_id + "' AND owner_id = '" + owner_id + "'";
@@ -295,12 +295,12 @@ public class PostgreSQL_Database implements DataStorage {
         ArrayList<String> friendList = new ArrayList<String>();
         String username = curUser.getUsername();
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
             String query = "SELECT req_sender, req_receiver FROM user_friends WHERE (req_sender = '" + username
                     + "' or req_receiver = '" + username + "') AND status = 'approved'";
 
-            ResultSet rs = statement.executeQuery(query);
+            rs = statement.executeQuery(query);
 
             while (rs.next()) {
                 String user_1 = rs.getString(1);
@@ -334,7 +334,7 @@ public class PostgreSQL_Database implements DataStorage {
             return null;
         }
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String query = "SELECT * from users WHERE username = '" + friend_username + "'";
@@ -369,13 +369,13 @@ public class PostgreSQL_Database implements DataStorage {
 
         ArrayList<FriendRequest> friendRequestsList = new ArrayList<FriendRequest>();
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String query = "SELECT * FROM user_friends WHERE req_receiver = '" + curUser.getUsername()
                     + "' AND status = 'pending'";
 
-            ResultSet rs = statement.executeQuery(query);
+            rs = statement.executeQuery(query);
 
             while (rs.next()) {
                 int user_friends_id = rs.getInt(1);
@@ -383,11 +383,11 @@ public class PostgreSQL_Database implements DataStorage {
                 String receiver = rs.getString(3);
                 String status = rs.getString(4);
                 String note = rs.getString(5);
-                boolean isSeen = rs.getBoolean(6);
+                boolean isRead = rs.getBoolean(6);
                 Timestamp created_at = rs.getTimestamp(7);
                 Timestamp updated_at = rs.getTimestamp(8);
 
-                FriendRequest friendRequest = new FriendRequest(user_friends_id, sender, receiver, status, note, isSeen,
+                FriendRequest friendRequest = new FriendRequest(user_friends_id, sender, receiver, status, note, isRead,
                         created_at,
                         updated_at);
 
@@ -414,10 +414,10 @@ public class PostgreSQL_Database implements DataStorage {
     @Override
     public boolean acceptFriendReq(User user, int friend_req_id) {
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
-            String query = "Update user_friends set status = 'approved', isSeen = true WHERE user_friends_id = '"
+            String query = "Update user_friends set status = 'approved', isRead = true WHERE user_friends_id = '"
                     + friend_req_id + "'";
 
             int result = statement.executeUpdate(query);
@@ -445,10 +445,10 @@ public class PostgreSQL_Database implements DataStorage {
     @Override
     public boolean denyFriendReq(User user, int friend_req_id) {
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
-            String query = "Update user_friends set status = 'denied', isSeen = true WHERE user_friends_id = '"
+            String query = "Update user_friends set status = 'denied', isRead = true WHERE user_friends_id = '"
                     + friend_req_id + "'";
 
             int result = statement.executeUpdate(query);
@@ -473,56 +473,10 @@ public class PostgreSQL_Database implements DataStorage {
         }
     }
 
-    public ArrayList<String> friendSuggestionList(User curUser) {
-        ArrayList<String> friendSuggestionList = new ArrayList<String>();
-        try {
-            conn = DriverManager.getConnection(url, db_user, password);
-            statement = conn.createStatement();
-            ArrayList<String> friends = getFriendList(curUser);
-
-            for (String friend : friends) {
-                // SELECT a friend from current user's friends
-                String query = "SELECT * FROM users WHERE username = '" + friend + "'";
-                ResultSet rs = statement.executeQuery(query);
-                if (rs.next()) {
-                    String username = rs.getString(1);
-                    String name = rs.getString(2);
-                    String school = rs.getString(3);
-                    User friendOfUserFriend = new User(username, name, school);
-                    ArrayList<String> friendsFromFriend = getFriendList(friendOfUserFriend);
-                    // From friends of user's friend: add to the list
-                    // exclude current User.
-                    for (int i = 0; i < friendsFromFriend.size(); i++) {
-                        if (!friendsFromFriend.get(i).equals(curUser.getUsername())) {
-                            friendSuggestionList.add(friendsFromFriend.get(i));
-                        }
-                        if (i == 3) {
-                            break;
-                        }
-                    }
-                }
-            }
-            return friendSuggestionList;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return friendSuggestionList;
-        } finally {
-            // close the database
-            try {
-                rs.close();
-                statement.close();
-                conn.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-    }
-
     @Override
     public boolean isFriend(String username1, String username2) {
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String query = "SELECT 1 FROM user_friends WHERE status = 'approved' and (req_sender = '" + username1
@@ -557,7 +511,7 @@ public class PostgreSQL_Database implements DataStorage {
             return isRequestSend;
         }
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             // Check if two are friends or already request
@@ -570,7 +524,7 @@ public class PostgreSQL_Database implements DataStorage {
                     + "' AND req_receiver = '" + receiver + "') OR (req_sender = '" + receiver
                     + "' AND req_receiver = '" + sender + "')";
 
-            ResultSet rs = statement.executeQuery(friend_req_check);
+            rs = statement.executeQuery(friend_req_check);
             if (rs.next()) {
                 String status = rs.getString("status");
                 if (status.equals("approved")) {
@@ -587,6 +541,25 @@ public class PostgreSQL_Database implements DataStorage {
 
             int result = statement.executeUpdate(query);
             if (result == 1) {
+                rs = statement.executeQuery("Select last_insert_id() from user_friends");
+                if (rs.next()) {
+                    String queryMessage = "SELECT user_friends_id, req_receiver  FROM user_friends where user_friends_id = "
+                            + rs.getInt(1)
+                            + "";
+                    rs = statement.executeQuery(queryMessage);
+                    if (rs.next()) {
+                        Integer user_friends_id = rs.getInt(1);
+                        String req_receiver = rs.getString(2);
+                        Notification notification = new Notification(req_receiver, "FriendRequest", user_friends_id);
+
+                        boolean isNewNoticeInsert = insertNotification(notification);
+                        if (isNewNoticeInsert) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
                 isRequestSend = true;
                 return isRequestSend;
             } else {
@@ -612,7 +585,7 @@ public class PostgreSQL_Database implements DataStorage {
         FriendRequest fr = null;
 
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String query = "SELECT * FROM user_friends WHERE user_friends_id = " + RequestId + "";
@@ -624,13 +597,13 @@ public class PostgreSQL_Database implements DataStorage {
                 String req_receiver = rs.getString(3);
                 String status = rs.getString(4);
                 String note = rs.getString(5);
-                Boolean read = rs.getBoolean(6);
+                Boolean isRead = rs.getBoolean(6);
                 Timestamp created_at = rs.getTimestamp(7);
                 Timestamp updated_at = rs.getTimestamp(8);
-                fr = new FriendRequest(user_friends_id, req_sender, req_receiver, status, note, read, created_at,
+                fr = new FriendRequest(user_friends_id, req_sender, req_receiver, status, note, isRead, created_at,
                         updated_at);
 
-                String updateQuery = "UPDATE user_friends set read = true, updated_at = CURRENT_TIMESTAMP where user_friends_id = "
+                String updateQuery = "UPDATE user_friends set isRead = true, updated_at = CURRENT_TIMESTAMP where user_friends_id = "
                         + user_friends_id + "";
 
                 int result = statement.executeUpdate(updateQuery);
@@ -659,13 +632,16 @@ public class PostgreSQL_Database implements DataStorage {
     @Override
     public boolean updateReadFriendRequest(User user, FriendRequest friendRequest) {
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
-            String updateQuery = "UPDATE user_friends set read = true, updated_at = CURRENT_TIMESTAMP WHERE user_friends_id = '"
-                    + friendRequest.getFriend_req_id() + "' ";
+            conn.setAutoCommit(false);
+            String updateQuery = "UPDATE user_friends set isRead = true, updated_at = CURRENT_TIMESTAMP WHERE user_friends_id = "
+                    + friendRequest.getFriend_req_id() + " ";
             int result = statement.executeUpdate(updateQuery);
 
             if (result == 1) {
+                conn.commit();
+                conn.setAutoCommit(true);
                 return true;
             } else {
                 return false;
@@ -675,7 +651,6 @@ public class PostgreSQL_Database implements DataStorage {
             return false;
         } finally {
             try {
-                rs.close();
                 statement.close();
                 conn.close();
             } catch (Exception e) {
@@ -690,7 +665,7 @@ public class PostgreSQL_Database implements DataStorage {
     public Message getMessageById(User user, int messageId) {
         Message m = null;
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String query = "Select * FROM message WHERE id = " + messageId + "";
@@ -702,15 +677,15 @@ public class PostgreSQL_Database implements DataStorage {
                 String receiver = rs.getString(3);
                 int parent_message_id = rs.getInt(4);
                 String content = rs.getString(5);
-                Boolean read = rs.getBoolean(6);
+                Boolean isRead = rs.getBoolean(6);
                 Timestamp created_at = rs.getTimestamp(7);
 
-                String updateQuery = "Update message set read = true WHERE id = " + id + "";
+                String updateQuery = "Update message set isRead = true WHERE id = " + id + "";
                 int result = statement.executeUpdate(updateQuery);
                 if (result == 0) {
                     return null;
                 }
-                m = new Message(id, sender, receiver, content, parent_message_id, read, created_at);
+                m = new Message(id, sender, receiver, content, parent_message_id, isRead, created_at);
             }
             return m;
 
@@ -731,11 +706,11 @@ public class PostgreSQL_Database implements DataStorage {
     @Override
     public boolean updateReadMessage(User user, int messageId) {
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
-            String updateQuery = "UPDATE message set read = true where receiver = '" + user.getUsername()
-                    + "' and id = '" + messageId + "'";
+            String updateQuery = "UPDATE message set isRead = true where receiver = '" + user.getUsername()
+                    + "' and id = " + messageId + "";
             int result = statement.executeUpdate(updateQuery);
             if (result == 1) {
                 return true;
@@ -759,11 +734,11 @@ public class PostgreSQL_Database implements DataStorage {
     public ArrayList<Message> getNewMessages(User user) {
         ArrayList<Message> newMessages = new ArrayList<Message>();
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
-            String query = "Select * FROM message WHERE receiver = '" + user.getUsername() + "' AND read = false";
-            ResultSet rs = statement.executeQuery(query);
+            String query = "Select * FROM message WHERE receiver = '" + user.getUsername() + "' AND isRead = false";
+            rs = statement.executeQuery(query);
 
             while (rs.next()) {
                 int message_id = rs.getInt(1);
@@ -771,10 +746,10 @@ public class PostgreSQL_Database implements DataStorage {
                 String receiver = rs.getString(3);
                 int parent_message_id = rs.getInt(4);
                 String content = rs.getString(5);
-                boolean read = rs.getBoolean(6);
+                boolean isRead = rs.getBoolean(6);
                 Timestamp created_at = rs.getTimestamp(7);
 
-                Message message = new Message(message_id, sender, receiver, content, parent_message_id, read,
+                Message message = new Message(message_id, sender, receiver, content, parent_message_id, isRead,
                         created_at);
                 newMessages.add(message);
             }
@@ -798,7 +773,7 @@ public class PostgreSQL_Database implements DataStorage {
     public ArrayList<Message> getConversationFromAFriend(User user, String user_friend) {
         ArrayList<Message> conversation = new ArrayList<Message>();
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
             String curUsername = user.getUsername();
 
@@ -807,16 +782,17 @@ public class PostgreSQL_Database implements DataStorage {
                     + "') OR (sender = '" + user_friend + "' AND receiver = '" + curUsername
                     + "')ORDER BY created_at DESC LIMIT 5";
 
-            ResultSet rs = statement.executeQuery(query);
+            rs = statement.executeQuery(query);
             while (rs.next()) {
                 int id = rs.getInt(1);
                 String sender_id = rs.getString(2);
                 String receiver_id = rs.getString(3);
                 int parent_message_id = rs.getInt(4);
                 String content = rs.getString(5);
-                boolean read = rs.getBoolean(6);
+                boolean isRead = rs.getBoolean(6);
                 Timestamp created_at = rs.getTimestamp(7);
-                Message message = new Message(id, sender_id, receiver_id, content, parent_message_id, read, created_at);
+                Message message = new Message(id, sender_id, receiver_id, content, parent_message_id, isRead,
+                        created_at);
 
                 conversation.add(message);
             }
@@ -845,27 +821,43 @@ public class PostgreSQL_Database implements DataStorage {
             return false;
         }
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String queryLastMessage = "SELECT * FROM message WHERE (sender = '" + user.getUsername()
                     + "' AND receiver = '" + receiver + "') OR (sender = '" + receiver + "' AND receiver = '"
                     + user.getUsername() + "') ORDER BY created_at DESC LIMIT 1";
-            ResultSet rs = statement.executeQuery(queryLastMessage);
+            rs = statement.executeQuery(queryLastMessage);
             Integer parent_message_id = -1;
             if (rs.next()) {
                 parent_message_id = rs.getInt("id");
             }
-            String insertMessage = "INSERT into message(sender, receiver, parent_message_id, content) VALUES ('"
+            String query = "INSERT into message(sender, receiver, parent_message_id, content) VALUES ('"
                     + user.getUsername() + "', '" + receiver + "', '" + parent_message_id + "', '"
                     + messageContent + "')";
 
-            int result = statement.executeUpdate(insertMessage);
+            int result = statement.executeUpdate(query);
             if (result == 1) {
-                return true;
-            } else {
-                return false;
+                // Query the id of message to update notifications table
+                rs = statement.executeQuery("Select last_insert_id() from user_friends");
+                if (rs.next()) {
+                    String queryMessage = "SELECT id, receiver FROM message where id = " + rs.getInt(1)
+                            + "";
+                    rs = statement.executeQuery(queryMessage);
+                    if (rs.next()) {
+                        Integer messageId = rs.getInt(1);
+                        String messReceiver = rs.getString(2);
+                        Notification notification = new Notification(messReceiver, "NewMessage", messageId);
+
+                        boolean isNewNoticeInsert = insertNotification(notification);
+                        if (isNewNoticeInsert) {
+                            return true;
+                        }
+                    }
+                }
             }
+
+            return false;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -884,7 +876,7 @@ public class PostgreSQL_Database implements DataStorage {
     @Override
     public boolean addNewComment(User user, Comment newComment) {
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String insertQuery = "INSERT INTO comments(post_id, owner_username, content) VALUES ('"
@@ -912,11 +904,14 @@ public class PostgreSQL_Database implements DataStorage {
         }
     }
 
+    /**
+     * Get notificaitons when have new friend request or new message
+     */
     @Override
     public ArrayList<Notification> getNotifications(User user) {
         ArrayList<Notification> notificationList = new ArrayList<Notification>();
         try {
-            conn = DriverManager.getConnection(url, db_user, password);
+            conn = DriverManager.getConnection(url, db_user, db_password);
             statement = conn.createStatement();
 
             String query = "SELECT * FROM notifications WHERE username = '" + user.getUsername() + "'";
@@ -947,15 +942,60 @@ public class PostgreSQL_Database implements DataStorage {
         }
     }
 
+    /**
+     * INSERT NOTIFICAITON when send friend request or send message
+     */
     @Override
     public boolean insertNotification(Notification notice) {
-        // TODO Auto-generated method stub
-        return false;
+        try {
+            conn = DriverManager.getConnection(url, db_user, db_password);
+            statement = conn.createStatement();
+
+            String query = "INSERT INTO notifications(username, type_of_notice, message_or_friend_req_id, created_at) VALUES('"
+                    + notice.getUsername() + "', '" + notice.getType_of_notice() + "', "
+                    + notice.getMessage_or_friend_req_id() + ", CURRENT_TIMESTAMP)";
+            int result = statement.executeUpdate(query);
+            if (result == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                statement.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public boolean deleteNotification(int id) {
-        // TODO Auto-generated method stub
-        return false;
+        try {
+            conn = DriverManager.getConnection(url, db_user, db_password);
+            statement = conn.createStatement();
+
+            String query = "DELETE from notifications WHERE message_or_friend_req_id = " + id + "";
+            int result = statement.executeUpdate(query);
+            if (result == 1) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                statement.close();
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

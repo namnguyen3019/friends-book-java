@@ -27,9 +27,8 @@ public class FriendsScreen {
 
             System.out.println("1. Show your friend lists");
             System.out.println("2. Show a friend's profile");
-            System.out.println("3. Show friend's requests");
-            System.out.println("4. Show friend suggestions");
-            System.out.println("5. Send a friend request");
+            System.out.println("3. Show friend requests");
+            System.out.println("4. Send a friend request");
             System.out.println("x. Return ");
 
             selection = input.next();
@@ -45,9 +44,6 @@ public class FriendsScreen {
                     showFriendRequest(user, d);
                     break;
                 case "4":
-                    showFriendSuggestions(user, d);
-                    break;
-                case "5":
                     sendFriendReq(user, d);
                     break;
             }
@@ -55,6 +51,7 @@ public class FriendsScreen {
     }
 
     private void showFriendList(User user, DataStorage d) {
+        friendList = d.getFriendList(user);
         if (friendList.size() == 0) {
             System.out.println(
                     "You have no friend yet. Add new friends to see more");
@@ -90,7 +87,10 @@ public class FriendsScreen {
             for (FriendRequest friendRequest : friendReqList) {
                 // Remove from notificaitons
                 notice.removeFriendReqNotice(friendRequest.getFriend_req_id());
-
+                // set read = true in database
+                d.updateReadFriendRequest(user, friendRequest);
+                // Delete friend req in database
+                d.deleteNotification(friendRequest.getFriend_req_id());
                 System.out.println("A req from : '" + friendRequest.getSender() + "' at '"
                         + friendRequest.getCreated_at().toString() + "'");
 
@@ -114,23 +114,8 @@ public class FriendsScreen {
                 } else if (userInput.equals("x")) {
                     break;
                 }
-
             }
         }
-    }
-
-    private void showFriendSuggestions(User user, DataStorage d) {
-
-        System.out.println("People who you might know: ");
-        ArrayList<String> suggestedFriendList = d.friendSuggestionList(user);
-        if (suggestedFriendList.size() == 0) {
-            System.out.println("No suggestion yet");
-        } else {
-            for (String friend : suggestedFriendList) {
-                System.out.println(friend);
-            }
-        }
-
     }
 
     private void sendFriendReq(User user, DataStorage d) {

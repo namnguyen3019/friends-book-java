@@ -1,5 +1,6 @@
 package nam.nguyen;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 public class User {
@@ -9,6 +10,7 @@ public class User {
     private String password;
     private String name;
     private String school;
+    private Timestamp created_at;
 
     public User(String username, String name, String school) {
         this.username = username;
@@ -21,6 +23,13 @@ public class User {
         this.password = password;
         this.name = name;
         this.school = school;
+    }
+
+    public User(String username, String name, String school, Timestamp created_at) {
+        this.username = username;
+        this.name = name;
+        this.school = school;
+        this.created_at = created_at;
     }
 
     public boolean createPost(Post post, DataStorage d) {
@@ -90,5 +99,9 @@ public class User {
 
     public String getUsername() {
         return username;
+    }
+
+    public Timestamp getCreated_at() {
+        return created_at;
     }
 }

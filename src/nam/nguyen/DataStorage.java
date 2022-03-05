@@ -27,9 +27,9 @@ public interface DataStorage {
 
     boolean sendFriendReq(FriendRequest friendRequest);
 
-    ArrayList<String> friendSuggestionList(User user);
-
     FriendRequest getFriendReqById(User user, int id);
+
+    boolean updateReadFriendRequest(User user, FriendRequest friendRequest);
 
     // Posts and Comment
     boolean createPost(Post post);
@@ -58,4 +58,7 @@ public interface DataStorage {
     // Notifications
     ArrayList<Notification> getNotifications(User user);
 
+    boolean insertNotification(Notification notice);
+
+    boolean deleteNotification(int id);
 }
